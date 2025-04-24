@@ -9,7 +9,7 @@ async function bootstrap() {
     .setTitle('ExpTrac API')
     .setDescription('API description for ExpTrac')
     .setVersion('1.0')
-    .addTag('cats')
+    .addTag('CRUD API')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
