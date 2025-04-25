@@ -1,0 +1,15 @@
+services:
+  test-db:
+    image: postgres:17-alpine
+    container_name: nest-mobile-test-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: test_db
+    ports:
+      - '5435:5432'
+    networks:
+      - dev-network
+
+networks:
+  dev-network:

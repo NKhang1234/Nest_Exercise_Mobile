@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 // prisma/seed.ts
 import { PrismaClient } from '@prisma/client';
 
@@ -19,9 +20,24 @@ async function main() {
   // Seed Wallets
   await prisma.wallet.createMany({
     data: [
-      { name: 'Cash', initAmount: 500.0, currency: 'USD', visibleCategory: 'Food' },
-      { name: 'Bank Account', initAmount: 2000.0, currency: 'USD', visibleCategory: null },
-      { name: 'Savings', initAmount: 10000.0, currency: 'USD', visibleCategory: 'Salary' },
+      {
+        name: 'Cash',
+        initAmount: 500.0,
+        currency: 'USD',
+        visibleCategory: 'Food',
+      },
+      {
+        name: 'Bank Account',
+        initAmount: 2000.0,
+        currency: 'USD',
+        visibleCategory: null,
+      },
+      {
+        name: 'Savings',
+        initAmount: 10000.0,
+        currency: 'USD',
+        visibleCategory: 'Salary',
+      },
     ],
   });
 
@@ -78,9 +94,27 @@ async function main() {
   // Seed Budgets
   await prisma.budget.createMany({
     data: [
-      { name: 'Monthly Food Budget', amount: 300.0, currency: 'USD', walletId: 'Cash', repeat: 'monthly' },
-      { name: 'Transport Budget', amount: 100.0, currency: 'USD', walletId: 'Bank Account', repeat: 'monthly' },
-      { name: 'Annual Savings Goal', amount: 5000.0, currency: 'USD', walletId: 'Savings', repeat: 'yearly' },
+      {
+        name: 'Monthly Food Budget',
+        amount: 300.0,
+        currency: 'USD',
+        walletId: 'Cash',
+        repeat: 'monthly',
+      },
+      {
+        name: 'Transport Budget',
+        amount: 100.0,
+        currency: 'USD',
+        walletId: 'Bank Account',
+        repeat: 'monthly',
+      },
+      {
+        name: 'Annual Savings Goal',
+        amount: 5000.0,
+        currency: 'USD',
+        walletId: 'Savings',
+        repeat: 'yearly',
+      },
     ],
   });
 
