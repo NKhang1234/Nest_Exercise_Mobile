@@ -6,15 +6,17 @@ import { setupTestApp } from './test-utils';
 describe('CategoryController (e2e)', () => {
   let app: INestApplication;
   let prismaService: PrismaService;
+  let authToken: string;
 
   beforeAll(async () => {
     try {
       const setup = await setupTestApp();
       app = setup.app;
       prismaService = setup.prismaService;
+      authToken = setup.authToken;
 
-      // Clean up before starting to ensure a fresh state
-      await prismaService.cleanDatabase();
+      // Clean up before starting but preserve users
+      await prismaService.cleanDatabasePreserveUsers();
     } catch (error) {
       console.error('Error in beforeAll:', error);
       throw error;
@@ -38,8 +40,8 @@ describe('CategoryController (e2e)', () => {
 
   afterAll(async () => {
     try {
-      // Clean up database
-      await prismaService.cleanDatabase();
+      // Clean up database but preserve users
+      await prismaService.cleanDatabasePreserveUsers();
       await app.close();
     } catch (error) {
       console.error('Error in afterAll cleanup:', error);
@@ -48,8 +50,10 @@ describe('CategoryController (e2e)', () => {
 
   it('/categories (POST) - creates a new category', async () => {
     try {
+      // Fix: Ensure the Bearer token has proper formatting
       const response = await request(app.getHttpServer())
         .post('/categories')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({ name: 'TestCategory1' })
         .expect(201);
 
@@ -65,16 +69,19 @@ describe('CategoryController (e2e)', () => {
       // Create test data through API
       await request(app.getHttpServer())
         .post('/categories')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({ name: 'TestCategory2' })
         .expect(201);
 
       await request(app.getHttpServer())
         .post('/categories')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({ name: 'TestCategory3' })
         .expect(201);
 
       const response = await request(app.getHttpServer())
         .get('/categories')
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
@@ -95,11 +102,13 @@ describe('CategoryController (e2e)', () => {
       // Create test data
       await request(app.getHttpServer())
         .post('/categories')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({ name: 'TestCategory4' })
         .expect(201);
 
       const response = await request(app.getHttpServer())
         .get('/categories/TestCategory4')
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
       expect(response.body).toHaveProperty('name', 'TestCategory4');
@@ -113,6 +122,7 @@ describe('CategoryController (e2e)', () => {
     try {
       await request(app.getHttpServer())
         .get('/categories/NonExistentCategory')
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(404);
     } catch (error) {
       console.error('Test failed:', error);
@@ -125,11 +135,13 @@ describe('CategoryController (e2e)', () => {
       // Create test data
       await request(app.getHttpServer())
         .post('/categories')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({ name: 'TestCategory5' })
         .expect(201);
 
       const response = await request(app.getHttpServer())
         .put('/categories/TestCategory5')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({ name: 'TestCategoryUpdated' })
         .expect(200);
 
@@ -145,17 +157,20 @@ describe('CategoryController (e2e)', () => {
       // Create test data
       await request(app.getHttpServer())
         .post('/categories')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({ name: 'TestCategoryToDelete' })
         .expect(201);
 
       // Delete category
       await request(app.getHttpServer())
         .delete('/categories/TestCategoryToDelete')
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(204);
 
       // Verify deletion
       await request(app.getHttpServer())
         .get('/categories/TestCategoryToDelete')
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(404);
     } catch (error) {
       console.error('Test failed:', error);

@@ -6,15 +6,17 @@ import { setupTestApp } from './test-utils';
 describe('WalletController (e2e)', () => {
   let app: INestApplication;
   let prismaService: PrismaService;
+  let authToken: string; // Add this to store the auth token
 
   beforeAll(async () => {
     try {
       const setup = await setupTestApp();
       app = setup.app;
       prismaService = setup.prismaService;
+      authToken = setup.authToken; // Get the auth token from setup
 
-      // Clean up before starting tests to ensure a fresh state
-      await prismaService.cleanDatabase();
+      // Clean up before starting tests but preserve users
+      await prismaService.cleanDatabasePreserveUsers();
 
       // Create a test category for wallet relationships
       await prismaService.category.create({
@@ -44,8 +46,8 @@ describe('WalletController (e2e)', () => {
 
   afterAll(async () => {
     try {
-      // Clean up database
-      await prismaService.cleanDatabase();
+      // Clean up database but preserve users
+      await prismaService.cleanDatabasePreserveUsers();
       await app.close();
     } catch (error) {
       console.error('Error in afterAll cleanup:', error);
@@ -55,8 +57,10 @@ describe('WalletController (e2e)', () => {
   // Individual tests with better error handling
   it('/wallets (POST) - creates a new wallet', async () => {
     try {
+      // Fix: Ensure the Bearer token has proper formatting
       const response = await request(app.getHttpServer())
         .post('/wallets')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'TestWallet1',
           initAmount: 1000,
@@ -79,6 +83,7 @@ describe('WalletController (e2e)', () => {
     try {
       const response = await request(app.getHttpServer())
         .post('/wallets')
+        .set('Authorization', `Bearer ${authToken}`) // Add this line
         .send({
           name: 'TestWallet2',
           initAmount: 500,
@@ -101,6 +106,7 @@ describe('WalletController (e2e)', () => {
       // Create test data through API
       await request(app.getHttpServer())
         .post('/wallets')
+        .set('Authorization', `Bearer ${authToken}`) // Add this line
         .send({
           name: 'TestWallet3',
           initAmount: 300,
@@ -111,6 +117,7 @@ describe('WalletController (e2e)', () => {
 
       await request(app.getHttpServer())
         .post('/wallets')
+        .set('Authorization', `Bearer ${authToken}`) // Add this line
         .send({
           name: 'TestWallet4',
           initAmount: 400,
@@ -120,6 +127,7 @@ describe('WalletController (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .get('/wallets')
+        .set('Authorization', `Bearer ${authToken}`) // Add this line
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
@@ -140,6 +148,7 @@ describe('WalletController (e2e)', () => {
       // Create test data
       await request(app.getHttpServer())
         .post('/wallets')
+        .set('Authorization', `Bearer ${authToken}`) // Add this line
         .send({
           name: 'TestWallet5',
           initAmount: 250,
@@ -149,6 +158,7 @@ describe('WalletController (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .get('/wallets/TestWallet5')
+        .set('Authorization', `Bearer ${authToken}`) // Add this line
         .expect(200);
 
       expect(response.body).toHaveProperty('name', 'TestWallet5');
@@ -164,6 +174,7 @@ describe('WalletController (e2e)', () => {
     try {
       await request(app.getHttpServer())
         .get('/wallets/NonExistentWallet')
+        .set('Authorization', `Bearer ${authToken}`) // Add this line
         .expect(404);
     } catch (error) {
       console.error('Test failed:', error);
@@ -176,6 +187,7 @@ describe('WalletController (e2e)', () => {
       // Create test data with a unique name for this test
       const createResponse = await request(app.getHttpServer())
         .post('/wallets')
+        .set('Authorization', `Bearer ${authToken}`) // Add this line
         .send({
           name: 'TestWalletForUpdate',
           initAmount: 100,
@@ -187,6 +199,7 @@ describe('WalletController (e2e)', () => {
 
       const updateResponse = await request(app.getHttpServer())
         .put('/wallets/TestWalletForUpdate')
+        .set('Authorization', `Bearer ${authToken}`) // Add this line
         .send({
           name: 'TestWalletUpdated',
           initAmount: 150,
@@ -213,6 +226,7 @@ describe('WalletController (e2e)', () => {
       // Create test data with a unique name for this test
       await request(app.getHttpServer())
         .post('/wallets')
+        .set('Authorization', `Bearer ${authToken}`) // Add this line
         .send({
           name: 'TestWalletToDelete',
           initAmount: 200,
@@ -223,11 +237,13 @@ describe('WalletController (e2e)', () => {
       // Delete wallet
       await request(app.getHttpServer())
         .delete('/wallets/TestWalletToDelete')
+        .set('Authorization', `Bearer ${authToken}`) // Add this line
         .expect(204);
 
       // Verify deletion
       await request(app.getHttpServer())
         .get('/wallets/TestWalletToDelete')
+        .set('Authorization', `Bearer ${authToken}`) // Add this line
         .expect(404);
     } catch (error) {
       console.error('Test failed:', error);

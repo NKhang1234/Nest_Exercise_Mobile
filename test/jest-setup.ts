@@ -19,9 +19,26 @@ beforeAll(async () => {
   }
 });
 
-// Disconnect after all tests are done
+// Disconnect and clean everything after all test suites are done
 afterAll(async () => {
   try {
+    console.log(
+      'Running global cleanup, removing all test data including users',
+    );
+    // Define cleanup tables
+    const tablenames = [
+      'Transaction',
+      'Budget',
+      'Subscription',
+      'Wallet',
+      'Category',
+      'UserProfile',
+    ];
+
+    for (const table of tablenames) {
+      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE;`);
+    }
+
     await prisma.$disconnect();
     console.log('Disconnected from test database successfully');
   } catch (error) {
