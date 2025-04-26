@@ -1,0 +1,42 @@
+name: NestJS E2E Tests
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Setup Docker Compose
+      run: |
+        docker-compose -f docker-compose.yml up -d test-db
+        # Wait for PostgreSQL to be ready
+        echo "Waiting for PostgreSQL to be ready..."
+        sleep 10
+        
+    - name: Run E2E tests
+      run: npm run test:e2e
+      env:
+        DB_USER: postgres
+        DB_NAME: test_db
+        DB_PASSWORD: password
+        DB_PORT: 5435
+        DB_HOST: localhost
+        DATABASE_URL: postgresql://postgres:password@localhost:5435/test_db?schema=public
+        NODE_ENV: test
