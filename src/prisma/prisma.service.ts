@@ -33,4 +33,20 @@ export class PrismaService
       await this.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE;`);
     }
   }
+
+  // New method that preserves user profiles during cleanup
+  async cleanDatabasePreserveUsers() {
+    // Delete data in reverse order of dependencies but exclude UserProfile
+    const tablenames = [
+      'Transaction',
+      'Budget',
+      'Subscription',
+      'Wallet',
+      'Category',
+    ];
+
+    for (const table of tablenames) {
+      await this.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE;`);
+    }
+  }
 }
