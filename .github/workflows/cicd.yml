@@ -23,9 +23,12 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
-    - name: Setup Docker Compose
+    - name: Setup Docker
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Start Docker Compose services
       run: |
-        docker-compose -f docker-compose.yml up -d test-db
+        docker compose -f docker-compose.yml up -d test-db
         # Wait for PostgreSQL to be ready
         echo "Waiting for PostgreSQL to be ready..."
         sleep 10
