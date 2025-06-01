@@ -9,42 +9,69 @@ import { PrismaService } from '../prisma/prisma.service';
 export class CategoryService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createCategoryDto: CreateCategoryDto) {
+  async create(createCategoryDto: CreateCategoryDto, userId: string) {
     return this.prisma.category.create({
       data: {
         name: createCategoryDto.name,
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
       },
     });
   }
 
-  async findAll() {
-    return this.prisma.category.findMany();
+  async findAll(userId: string) {
+    return this.prisma.category.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
   }
 
-  async findOne(name: string) {
-    const category = await this.prisma.category.findUnique({
-      where: { name },
+  async findOne(id: string, userId: string) {
+    const category = await this.prisma.category.findFirst({
+      where: { id, userId },
+      select: {
+        id: true,
+        name: true,
+      },
     });
     if (!category) {
-      throw new NotFoundException(`Category with name ${name} not found`);
+      throw new NotFoundException(`Category with id ${id} not found`);
     }
     return category;
   }
 
-  async update(name: string, updateCategoryDto: UpdateCategoryDto) {
-    await this.findOne(name); // Ensure category exists
+  async update(
+    id: string,
+    updateCategoryDto: UpdateCategoryDto,
+    userId: string,
+  ) {
+    await this.findOne(id, userId); // Ensure category exists and belongs to user
     return this.prisma.category.update({
-      where: { name },
+      where: { id },
       data: {
         name: updateCategoryDto.name,
+      },
+      select: {
+        id: true,
+        name: true,
       },
     });
   }
 
-  async remove(name: string) {
-    await this.findOne(name); // Ensure category exists
+  async remove(id: string, userId: string) {
+    await this.findOne(id, userId); // Ensure category exists and belongs to user
     return this.prisma.category.delete({
-      where: { name },
+      where: { id },
     });
   }
 }

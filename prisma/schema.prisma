@@ -15,44 +15,68 @@ datasource db {
 
 // Prisma Schema based on SQLite schema
 
+// UserProfile model
+// Stores user profile information
+model UserProfile {
+  id       String  @id @default(uuid())
+  password String
+  name     String  @unique
+  avatar   String?
+
+  categories    Category[]
+  wallets       Wallet[]
+  transactions  Transaction[]
+  budgets       Budget[]
+  subscriptions Subscription[]
+
+  @@index([name], name: "idx_user_name")
+}
+
 // Category model
 // Stores different expense/income categories
 model Category {
-  name         String          @id @unique // TEXT PRIMARY KEY NOT NULL UNIQUE
-  transactions Transaction[]   // Relation to Transaction (category field)
-  subscriptions Subscription[] // Relation to Subscription (category field)
-  wallets      Wallet[]        @relation("VisibleCategory") // Relation to Wallet (visible_category field)
+  id            String           @id @default(uuid())
+  name          String           
+  userId        String
+  user          UserProfile      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+  subscriptions Subscription[]
+  wallets       Wallet[]         @relation("VisibleCategory")
 }
 
 // Wallet model
 // Stores information about different money sources/accounts
 model Wallet {
-  name            String          @id @unique // TEXT PRIMARY KEY NOT NULL UNIQUE
-  initAmount      Float           @default(0) // REAL NOT NULL DEFAULT 0
-  currency        String          // TEXT NOT NULL
-  visibleCategory String?         // TEXT, nullable
-  category        Category?       @relation("VisibleCategory", fields: [visibleCategory], references: [name], onDelete: SetNull, onUpdate: Cascade)
-  transactions    Transaction[]   // Relation to Transaction (wallet field)
-  budgets         Budget[]        // Relation to Budget (wallet field)
+  id              String         @id @default(uuid())
+  name            String         
+  initAmount      Float          @default(0)
+  currency        String
+  visibleCategory String?
+  userId          String
+  user            UserProfile    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category        Category?      @relation("VisibleCategory", fields: [visibleCategory], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  transactions    Transaction[]
+  budgets         Budget[]
 }
 
 // Transaction model
 // Records individual income or expense transactions
 model Transaction {
-  id       Int      @id @default(autoincrement()) // INTEGER PRIMARY KEY AUTOINCREMENT
-  type     String   // TEXT NOT NULL, constrained by CHECK
-  amount   Float    // REAL NOT NULL
-  currency String   // TEXT NOT NULL
-  date     String   // TEXT NOT NULL (ISO8601 recommended)
-  walletId String   // TEXT NOT NULL (renamed to avoid reserved keyword)
-  categoryId String // TEXT NOT NULL (renamed for clarity)
-  repeat   String   @default("None") // TEXT NOT NULL DEFAULT 'None'
-  note     String?  // TEXT NULL
-  picture  String?  // TEXT NULL
-  wallet   Wallet   @relation(fields: [walletId], references: [name], onDelete: Cascade, onUpdate: Cascade)
-  category Category @relation(fields: [categoryId], references: [name], onDelete: Restrict, onUpdate: Cascade)
+  id         String   @id @default(uuid())
+  type       String
+  amount     Float
+  currency   String
+  date       String
+  walletId   String
+  categoryId String
+  userId     String
+  user       UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repeat     String   @default("None")
+  note       String?
+  picture    String?
+  wallet     Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
-  // Indexes
   @@index([walletId], name: "idx_transaction_wallet")
   @@index([categoryId], name: "idx_transaction_category")
   @@index([date], name: "idx_transaction_date")
@@ -61,41 +85,33 @@ model Transaction {
 // Budget model
 // Defines spending limits for specific categories/wallets over a period
 model Budget {
-  name     String  @id @unique // TEXT PRIMARY KEY NOT NULL UNIQUE
-  amount   Float   // REAL NOT NULL
-  currency String  // TEXT NOT NULL
-  walletId String  // TEXT NOT NULL (renamed for clarity)
-  repeat   String  @default("None") // TEXT NOT NULL DEFAULT 'None'
-  wallet   Wallet  @relation(fields: [walletId], references: [name], onDelete: Cascade, onUpdate: Cascade)
+  id       String  @id @default(uuid())
+  name     String  
+  amount   Float
+  currency String
+  walletId String
+  userId   String
+  user     UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repeat   String  @default("None")
+  wallet   Wallet  @relation(fields: [walletId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  // Index
   @@index([walletId], name: "idx_budget_wallet")
 }
 
 // Subscription model
 // Tracks recurring payments like subscriptions
 model Subscription {
-  name           String   @id @unique // TEXT PRIMARY KEY NOT NULL UNIQUE
-  amount         Float    // REAL NOT NULL
-  currency       String   // TEXT NOT NULL
-  billingDate    String   // TEXT NOT NULL (ISO8601 recommended)
-  repeat         String   // TEXT NOT NULL
-  reminderBefore Int      @default(0) // INTEGER DEFAULT 0
-  categoryId     String   // TEXT NOT NULL (renamed for clarity)
-  category       Category @relation(fields: [categoryId], references: [name], onDelete: Restrict, onUpdate: Cascade)
+  id             String   @id @default(uuid())
+  name           String   
+  amount         Float
+  currency       String
+  billingDate    String
+  repeat         String
+  reminderBefore Int      @default(0)
+  categoryId     String
+  userId         String
+  user           UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category       Category @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
-  // Index
   @@index([categoryId], name: "idx_subscription_category")
-}
-
-// UserProfile model
-// Stores user profile information
-model UserProfile {
-  id       Int     @id @default(autoincrement()) // INTEGER PRIMARY KEY AUTOINCREMENT
-  password String  // TEXT NOT NULL (should store hash)
-  name     String  @unique // TEXT NOT NULL, unique index applied
-  avatar   String? // TEXT NULL
-
-  // Index
-  @@index([name], name: "idx_user_name")
 }

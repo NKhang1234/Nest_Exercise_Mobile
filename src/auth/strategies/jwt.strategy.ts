@@ -14,7 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { sub: number; name: string }) {
+  async validate(payload: { sub: string; name: string }) {
     try {
       if (!payload || !payload.sub) {
         console.error('Invalid JWT payload:', payload);

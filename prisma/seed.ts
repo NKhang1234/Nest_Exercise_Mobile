@@ -2,20 +2,35 @@
 // prisma/seed.ts
 import { PrismaClient } from '@prisma/client';
 
-// Explicitly type the PrismaClient instance
 const prisma = new PrismaClient();
 
 async function main() {
+  // Seed UserProfiles
+  const user = await prisma.userProfile.create({
+    data: {
+      password: '$2b$10$exampleHashedPassword123',
+      name: 'JohnDoe',
+      avatar: '/images/john_doe_avatar.png',
+    },
+  });
+
   // Seed Categories
-  await prisma.category.createMany({
+  const categories = await prisma.category.createMany({
     data: [
-      { name: 'Food' },
-      { name: 'Salary' },
-      { name: 'Transport' },
-      { name: 'Entertainment' },
-      { name: 'Bills' },
+      { name: 'Food', userId: user.id },
+      { name: 'Salary', userId: user.id },
+      { name: 'Transport', userId: user.id },
+      { name: 'Entertainment', userId: user.id },
+      { name: 'Bills', userId: user.id },
     ],
   });
+
+  // Fetch categories with their IDs
+  const categoryMap = Object.fromEntries(
+    (await prisma.category.findMany({ where: { userId: user.id } })).map(
+      (c) => [c.name, c.id],
+    ),
+  );
 
   // Seed Wallets
   await prisma.wallet.createMany({
@@ -24,22 +39,33 @@ async function main() {
         name: 'Cash',
         initAmount: 500.0,
         currency: 'USD',
-        visibleCategory: 'Food',
+        visibleCategory: categoryMap['Food'],
+        userId: user.id,
       },
       {
         name: 'Bank Account',
         initAmount: 2000.0,
         currency: 'USD',
         visibleCategory: null,
+        userId: user.id,
       },
       {
         name: 'Savings',
         initAmount: 10000.0,
         currency: 'USD',
-        visibleCategory: 'Salary',
+        visibleCategory: categoryMap['Salary'],
+        userId: user.id,
       },
     ],
   });
+
+  // Fetch wallets with their IDs
+  const walletMap = Object.fromEntries(
+    (await prisma.wallet.findMany({ where: { userId: user.id } })).map((w) => [
+      w.name,
+      w.id,
+    ]),
+  );
 
   // Seed Transactions
   await prisma.transaction.createMany({
@@ -49,8 +75,9 @@ async function main() {
         amount: 25.5,
         currency: 'USD',
         date: '2025-04-01T12:30:00Z',
-        walletId: 'Cash',
-        categoryId: 'Food',
+        walletId: walletMap['Cash'],
+        categoryId: categoryMap['Food'],
+        userId: user.id,
         repeat: 'None',
         note: 'Lunch at cafe',
         picture: null,
@@ -60,8 +87,9 @@ async function main() {
         amount: 1500.0,
         currency: 'USD',
         date: '2025-04-01T09:00:00Z',
-        walletId: 'Bank Account',
-        categoryId: 'Salary',
+        walletId: walletMap['Bank Account'],
+        categoryId: categoryMap['Salary'],
+        userId: user.id,
         repeat: 'monthly',
         note: 'Monthly salary',
         picture: null,
@@ -71,8 +99,9 @@ async function main() {
         amount: 50.0,
         currency: 'USD',
         date: '2025-04-02T15:45:00Z',
-        walletId: 'Bank Account',
-        categoryId: 'Transport',
+        walletId: walletMap['Bank Account'],
+        categoryId: categoryMap['Transport'],
+        userId: user.id,
         repeat: 'None',
         note: 'Taxi ride',
         picture: '/images/taxi_receipt.jpg',
@@ -82,8 +111,9 @@ async function main() {
         amount: 15.0,
         currency: 'USD',
         date: '2025-04-03T20:00:00Z',
-        walletId: 'Cash',
-        categoryId: 'Entertainment',
+        walletId: walletMap['Cash'],
+        categoryId: categoryMap['Entertainment'],
+        userId: user.id,
         repeat: 'None',
         note: 'Movie ticket',
         picture: null,
@@ -98,21 +128,24 @@ async function main() {
         name: 'Monthly Food Budget',
         amount: 300.0,
         currency: 'USD',
-        walletId: 'Cash',
+        walletId: walletMap['Cash'],
+        userId: user.id,
         repeat: 'monthly',
       },
       {
         name: 'Transport Budget',
         amount: 100.0,
         currency: 'USD',
-        walletId: 'Bank Account',
+        walletId: walletMap['Bank Account'],
+        userId: user.id,
         repeat: 'monthly',
       },
       {
         name: 'Annual Savings Goal',
         amount: 5000.0,
         currency: 'USD',
-        walletId: 'Savings',
+        walletId: walletMap['Savings'],
+        userId: user.id,
         repeat: 'yearly',
       },
     ],
@@ -128,7 +161,8 @@ async function main() {
         billingDate: '2025-05-01T00:00:00Z',
         repeat: 'monthly',
         reminderBefore: 1440,
-        categoryId: 'Entertainment',
+        categoryId: categoryMap['Entertainment'],
+        userId: user.id,
       },
       {
         name: 'Internet',
@@ -137,23 +171,8 @@ async function main() {
         billingDate: '2025-04-28T00:00:00Z',
         repeat: 'monthly',
         reminderBefore: 0,
-        categoryId: 'Bills',
-      },
-    ],
-  });
-
-  // Seed UserProfiles
-  await prisma.userProfile.createMany({
-    data: [
-      {
-        password: '$2b$10$exampleHashedPassword123',
-        name: 'JohnDoe',
-        avatar: '/images/john_doe_avatar.png',
-      },
-      {
-        password: '$2b$10$anotherHashedPassword456',
-        name: 'JaneSmith',
-        avatar: null,
+        categoryId: categoryMap['Bills'],
+        userId: user.id,
       },
     ],
   });
