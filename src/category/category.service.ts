@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/require-await */
 
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -69,9 +74,17 @@ export class CategoryService {
   }
 
   async remove(id: string, userId: string) {
-    await this.findOne(id, userId); // Ensure category exists and belongs to user
-    return this.prisma.category.delete({
+    const category = await this.prisma.category.findFirst({
+      where: { id, userId },
+    });
+    if (!category) {
+      // Trả về 204 No Content nếu không tìm thấy
+      throw new HttpException('', HttpStatus.NO_CONTENT);
+    }
+    await this.prisma.category.delete({
       where: { id },
     });
+    // Trả về undefined để controller trả về 204 No Content
+    return;
   }
 }
