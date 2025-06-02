@@ -5,6 +5,9 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
+  await prisma.userProfile.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.wallet.deleteMany();
   // Seed UserProfiles
   const user = await prisma.userProfile.create({
     data: {
