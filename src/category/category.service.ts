@@ -74,17 +74,9 @@ export class CategoryService {
   }
 
   async remove(id: string, userId: string) {
-    const category = await this.prisma.category.findFirst({
-      where: { id, userId },
-    });
-    if (!category) {
-      // Trả về 204 No Content nếu không tìm thấy
-      throw new HttpException('', HttpStatus.NO_CONTENT);
-    }
-    await this.prisma.category.delete({
+    await this.findOne(id, userId); // Ensure wallet exists and belongs to user
+    return this.prisma.category.delete({
       where: { id },
     });
-    // Trả về undefined để controller trả về 204 No Content
-    return;
   }
 }

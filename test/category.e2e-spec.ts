@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, HttpStatus } from '@nestjs/common';
 import * as request from 'supertest';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { setupTestApp } from './test-utils';
@@ -100,14 +100,14 @@ describe('CategoryController (e2e)', () => {
   it('/categories/:name (GET) - returns a specific category', async () => {
     try {
       // Create test data
-      await request(app.getHttpServer())
+      const getResponse = await request(app.getHttpServer())
         .post('/categories')
         .set('Authorization', `Bearer ${authToken}`)
         .send({ name: 'TestCategory4' })
         .expect(201);
 
       const response = await request(app.getHttpServer())
-        .get('/categories/TestCategory4')
+        .get(`/categories/${getResponse.body.id}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
@@ -133,14 +133,14 @@ describe('CategoryController (e2e)', () => {
   it('/categories/:name (PUT) - updates a category', async () => {
     try {
       // Create test data
-      await request(app.getHttpServer())
+      const getResponse = await request(app.getHttpServer())
         .post('/categories')
         .set('Authorization', `Bearer ${authToken}`)
         .send({ name: 'TestCategory5' })
         .expect(201);
 
       const response = await request(app.getHttpServer())
-        .put('/categories/TestCategory5')
+        .put('/categories/' + getResponse.body.id)
         .set('Authorization', `Bearer ${authToken}`)
         .send({ name: 'TestCategoryUpdated' })
         .expect(200);
@@ -155,23 +155,23 @@ describe('CategoryController (e2e)', () => {
   it('/categories/:name (DELETE) - deletes a category', async () => {
     try {
       // Create test data
-      await request(app.getHttpServer())
+      const getResponse = await request(app.getHttpServer())
         .post('/categories')
         .set('Authorization', `Bearer ${authToken}`)
         .send({ name: 'TestCategoryToDelete' })
-        .expect(201);
+        .expect(HttpStatus.CREATED);
 
       // Delete category
       await request(app.getHttpServer())
-        .delete('/categories/TestCategoryToDelete')
+        .delete('/categories/' + getResponse.body.id)
         .set('Authorization', `Bearer ${authToken}`)
-        .expect(204);
+        .expect(HttpStatus.NO_CONTENT);
 
       // Verify deletion
       await request(app.getHttpServer())
-        .get('/categories/TestCategoryToDelete')
+        .get('/categories/' + getResponse.body.id)
         .set('Authorization', `Bearer ${authToken}`)
-        .expect(404);
+        .expect(HttpStatus.NOT_FOUND);
     } catch (error) {
       console.error('Test failed:', error);
       throw error;

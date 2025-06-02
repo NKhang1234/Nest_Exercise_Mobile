@@ -70,11 +70,13 @@ export class CategoryController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a category by id' })
   @ApiResponse({ status: 204, description: 'Category deleted successfully' })
   @ApiResponse({ status: 404, description: 'Category not found' })
   async remove(@Param('id') id: string, @Req() req: RequestWithUser) {
     const userId = req.user.id;
-    return this.categoryService.remove(id, userId);
+    await this.categoryService.remove(id, userId);
+    // Không return gì cả để trả về 204 No Content
   }
 }

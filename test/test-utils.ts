@@ -10,6 +10,7 @@ export async function setupTestApp(): Promise<{
   prismaService: PrismaService;
   jwtService: JwtService;
   authToken: string;
+  userId: string;
 }> {
   // Ensure NODE_ENV is set to 'test'
   process.env.NODE_ENV = 'test';
@@ -25,7 +26,9 @@ export async function setupTestApp(): Promise<{
   const prismaService = app.get<PrismaService>(PrismaService);
   const jwtService = app.get<JwtService>(JwtService);
 
-  // Ensure Prisma is connected
+  // Declare user variable in the outer scope
+  let user: any;
+
   try {
     // Test the connection
     await prismaService.$connect();
@@ -34,7 +37,7 @@ export async function setupTestApp(): Promise<{
     await prismaService.cleanDatabasePreserveUsers();
 
     // Check if test user already exists before creating
-    let user = await prismaService.userProfile.findUnique({
+    user = await prismaService.userProfile.findUnique({
       where: { name: 'testuser' },
     });
 
@@ -59,7 +62,7 @@ export async function setupTestApp(): Promise<{
   // Generate auth token
   const authToken = await getAuthToken(jwtService, prismaService);
 
-  return { app, prismaService, jwtService, authToken };
+  return { app, prismaService, jwtService, authToken, userId: user.id };
 }
 
 export async function getAuthToken(
