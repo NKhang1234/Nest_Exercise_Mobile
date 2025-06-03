@@ -48,35 +48,35 @@ export class WalletController {
     return this.walletService.findAll(userId);
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a wallet by id' })
+  @Get(':name')
+  @ApiOperation({ summary: 'Get a wallet by name' })
   @ApiResponse({ status: 200, description: 'Wallet found' })
   @ApiResponse({ status: 404, description: 'Wallet not found' })
-  async findOne(@Param('id') id: string, @Req() req: RequestWithUser) {
+  async findOne(@Param('name') name: string, @Req() req: RequestWithUser) {
     const userId = req.user.id;
-    return this.walletService.findOne(id, userId);
+    return this.walletService.findOne(name, userId);
   }
 
-  @Put(':id')
-  @ApiOperation({ summary: 'Update a wallet by id' })
+  @Put(':name')
+  @ApiOperation({ summary: 'Update a wallet by name' })
   @ApiResponse({ status: 200, description: 'Wallet updated successfully' })
   @ApiResponse({ status: 404, description: 'Wallet not found' })
   async update(
-    @Param('id') id: string,
+    @Param('name') name: string,
     @Body() updateWalletDto: UpdateWalletDto,
     @Req() req: RequestWithUser,
   ) {
     const userId = req.user.id;
-    return this.walletService.update(id, updateWalletDto, userId);
+    return this.walletService.update(name, updateWalletDto, userId);
   }
 
-  @Delete(':id')
+  @Delete(':name')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete a wallet by id' })
+  @ApiOperation({ summary: 'Delete a wallet by name' })
   @ApiResponse({ status: 204, description: 'Wallet deleted successfully' })
   @ApiResponse({ status: 404, description: 'Wallet not found' })
-  async remove(@Param('id') id: string, @Req() req: RequestWithUser) {
+  async remove(@Param('name') name: string, @Req() req: RequestWithUser) {
     const userId = req.user.id;
-    return this.walletService.remove(id, userId);
+    return this.walletService.remove(name, userId);
   }
 }

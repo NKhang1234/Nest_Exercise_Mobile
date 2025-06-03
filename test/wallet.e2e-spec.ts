@@ -69,7 +69,7 @@ describe('WalletController (e2e)', () => {
     expect(response.body.some((w) => w.name === 'TestWallet2')).toBe(true);
   });
 
-  it('/wallets/:id (GET) - returns a specific wallet', async () => {
+  it('/wallets/:name (GET) - returns a specific wallet', async () => {
     const createRes = await request(app.getHttpServer())
       .post('/wallets')
       .set('Authorization', `Bearer ${authToken}`)
@@ -81,14 +81,14 @@ describe('WalletController (e2e)', () => {
       .expect(HttpStatus.CREATED);
 
     const response = await request(app.getHttpServer())
-      .get(`/wallets/${createRes.body.id}`)
+      .get(`/wallets/${createRes.body.name}`)
       .set('Authorization', `Bearer ${authToken}`)
       .expect(HttpStatus.OK);
 
     expect(response.body).toHaveProperty('name', 'TestWallet3');
   });
 
-  it('/wallets/:id (PUT) - updates a wallet', async () => {
+  it('/wallets/:name (PUT) - updates a wallet', async () => {
     const createRes = await request(app.getHttpServer())
       .post('/wallets')
       .set('Authorization', `Bearer ${authToken}`)
@@ -100,7 +100,7 @@ describe('WalletController (e2e)', () => {
       .expect(HttpStatus.CREATED);
 
     const response = await request(app.getHttpServer())
-      .put(`/wallets/${createRes.body.id}`)
+      .put(`/wallets/${createRes.body.name}`)
       .set('Authorization', `Bearer ${authToken}`)
       .send({
         name: 'TestWallet4Updated',
@@ -112,7 +112,7 @@ describe('WalletController (e2e)', () => {
     expect(response.body).toHaveProperty('name', 'TestWallet4Updated');
   });
 
-  it('/wallets/:id (DELETE) - deletes a wallet', async () => {
+  it('/wallets/:name (DELETE) - deletes a wallet', async () => {
     const createRes = await request(app.getHttpServer())
       .post('/wallets')
       .set('Authorization', `Bearer ${authToken}`)
@@ -124,13 +124,13 @@ describe('WalletController (e2e)', () => {
       .expect(HttpStatus.CREATED);
 
     await request(app.getHttpServer())
-      .delete(`/wallets/${createRes.body.id}`)
+      .delete(`/wallets/${createRes.body.name}`)
       .set('Authorization', `Bearer ${authToken}`)
       .expect(HttpStatus.NO_CONTENT);
 
     // Verify deletion
     await request(app.getHttpServer())
-      .get(`/wallets/${createRes.body.id}`)
+      .get(`/wallets/${createRes.body.name}`)
       .set('Authorization', `Bearer ${authToken}`)
       .expect(HttpStatus.NOT_FOUND);
   });

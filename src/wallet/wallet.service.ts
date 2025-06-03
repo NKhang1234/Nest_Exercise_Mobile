@@ -26,21 +26,31 @@ export class WalletService {
     });
   }
 
-  async findOne(id: string, userId: string) {
+  async findOne(name: string, userId: string) {
     const wallet = await this.prisma.wallet.findFirst({
-      where: { id, userId },
+      where: { name, userId },
       include: { category: true },
     });
     if (!wallet) {
-      throw new NotFoundException(`Wallet with id ${id} not found`);
+      throw new NotFoundException(`Wallet with name ${name} not found`);
     }
     return wallet;
   }
 
-  async update(id: string, updateWalletDto: UpdateWalletDto, userId: string) {
-    await this.findOne(id, userId); // Ensure wallet exists and belongs to user
+  async update(name: string, updateWalletDto: UpdateWalletDto, userId: string) {
+    await this.findOne(name, userId); // Ensure wallet exists and belongs to user
+    // get the wallet id
+    const wallet = await this.prisma.wallet.findFirst({
+      where: { name, userId },
+      select: {
+        id: true,
+      },
+    });
+    if (!wallet) {
+      throw new NotFoundException(`Wallet with name ${name} not found`);
+    }
     return this.prisma.wallet.update({
-      where: { id },
+      where: { id: wallet.id },
       data: {
         name: updateWalletDto.name,
         initAmount: updateWalletDto.initAmount,
@@ -50,10 +60,17 @@ export class WalletService {
     });
   }
 
-  async remove(id: string, userId: string) {
-    await this.findOne(id, userId); // Ensure wallet exists and belongs to user
+  async remove(name: string, userId: string) {
+    await this.findOne(name, userId); // Ensure wallet exists and belongs to user
+    // get the wallet id
+    const wallet = await this.prisma.wallet.findFirst({
+      where: { name, userId },
+      select: {
+        id: true,
+      },
+    });
     return this.prisma.wallet.delete({
-      where: { id },
+      where: { id: wallet!.id },
     });
   }
 }
