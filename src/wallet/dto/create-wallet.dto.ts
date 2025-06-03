@@ -25,7 +25,7 @@ export class CreateWalletDto {
 
   @ApiProperty({
     description: 'Optional category name for visibility',
-    example: 'id-of-category',
+    example: 'name-of-category',
     required: false,
   })
   @IsString()

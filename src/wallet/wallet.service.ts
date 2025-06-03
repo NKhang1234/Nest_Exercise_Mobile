@@ -8,12 +8,24 @@ export class WalletService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createWalletDto: CreateWalletDto, userId: string) {
+    // get the id of the category
+    const category = await this.prisma.category.findFirst({
+      where: { name: createWalletDto.visibleCategory, userId },
+      select: {
+        id: true,
+      },
+    });
+    if (!category) {
+      throw new NotFoundException(
+        `Category with name ${createWalletDto.visibleCategory} not found`,
+      );
+    }
     return this.prisma.wallet.create({
       data: {
         name: createWalletDto.name,
         initAmount: createWalletDto.initAmount,
         currency: createWalletDto.currency,
-        visibleCategory: createWalletDto.visibleCategory,
+        visibleCategory: category.id,
         userId,
       },
     });
@@ -49,13 +61,25 @@ export class WalletService {
     if (!wallet) {
       throw new NotFoundException(`Wallet with name ${name} not found`);
     }
+    // get the id of the category
+    const category = await this.prisma.category.findFirst({
+      where: { name: updateWalletDto.visibleCategory, userId },
+      select: {
+        id: true,
+      },
+    });
+    if (!category) {
+      throw new NotFoundException(
+        `Category with name ${updateWalletDto.visibleCategory} not found`,
+      );
+    }
     return this.prisma.wallet.update({
       where: { id: wallet.id },
       data: {
         name: updateWalletDto.name,
         initAmount: updateWalletDto.initAmount,
         currency: updateWalletDto.currency,
-        visibleCategory: updateWalletDto.visibleCategory,
+        visibleCategory: category.id,
       },
     });
   }

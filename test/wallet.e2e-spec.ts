@@ -35,6 +35,15 @@ describe('WalletController (e2e)', () => {
   });
 
   it('/wallets (POST) - creates a new wallet', async () => {
+    // create a category
+    await request(app.getHttpServer())
+      .post('/categories')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        name: 'TestCategory1',
+      })
+      .expect(HttpStatus.CREATED);
+
     const response = await request(app.getHttpServer())
       .post('/wallets')
       .set('Authorization', `Bearer ${authToken}`)
@@ -42,6 +51,7 @@ describe('WalletController (e2e)', () => {
         name: 'TestWallet1',
         initAmount: 1000,
         currency: 'USD',
+        visibleCategory: 'TestCategory1',
       })
       .expect(HttpStatus.CREATED);
 
@@ -50,6 +60,15 @@ describe('WalletController (e2e)', () => {
   });
 
   it('/wallets (GET) - returns all wallets', async () => {
+    // create a category
+    await request(app.getHttpServer())
+      .post('/categories')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        name: 'TestCategory2',
+      })
+      .expect(HttpStatus.CREATED);
+
     await request(app.getHttpServer())
       .post('/wallets')
       .set('Authorization', `Bearer ${authToken}`)
@@ -57,6 +76,7 @@ describe('WalletController (e2e)', () => {
         name: 'TestWallet2',
         initAmount: 2000,
         currency: 'USD',
+        visibleCategory: 'TestCategory2',
       })
       .expect(HttpStatus.CREATED);
 
@@ -70,6 +90,15 @@ describe('WalletController (e2e)', () => {
   });
 
   it('/wallets/:name (GET) - returns a specific wallet', async () => {
+    // create a category
+    await request(app.getHttpServer())
+      .post('/categories')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        name: 'TestCategory3',
+      })
+      .expect(HttpStatus.CREATED);
+
     const createRes = await request(app.getHttpServer())
       .post('/wallets')
       .set('Authorization', `Bearer ${authToken}`)
@@ -77,6 +106,7 @@ describe('WalletController (e2e)', () => {
         name: 'TestWallet3',
         initAmount: 3000,
         currency: 'USD',
+        visibleCategory: 'TestCategory3',
       })
       .expect(HttpStatus.CREATED);
 
@@ -89,6 +119,15 @@ describe('WalletController (e2e)', () => {
   });
 
   it('/wallets/:name (PUT) - updates a wallet', async () => {
+    // create a category
+    await request(app.getHttpServer())
+      .post('/categories')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        name: 'TestCategory4',
+      })
+      .expect(HttpStatus.CREATED);
+
     const createRes = await request(app.getHttpServer())
       .post('/wallets')
       .set('Authorization', `Bearer ${authToken}`)
@@ -96,6 +135,7 @@ describe('WalletController (e2e)', () => {
         name: 'TestWallet4',
         initAmount: 4000,
         currency: 'USD',
+        visibleCategory: 'TestCategory4',
       })
       .expect(HttpStatus.CREATED);
 
@@ -113,6 +153,15 @@ describe('WalletController (e2e)', () => {
   });
 
   it('/wallets/:name (DELETE) - deletes a wallet', async () => {
+    // create a category
+    await request(app.getHttpServer())
+      .post('/categories')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        name: 'TestCategory5',
+      })
+      .expect(HttpStatus.CREATED);
+
     const createRes = await request(app.getHttpServer())
       .post('/wallets')
       .set('Authorization', `Bearer ${authToken}`)
@@ -120,6 +169,7 @@ describe('WalletController (e2e)', () => {
         name: 'TestWallet5',
         initAmount: 5000,
         currency: 'USD',
+        visibleCategory: 'TestCategory5',
       })
       .expect(HttpStatus.CREATED);
 
