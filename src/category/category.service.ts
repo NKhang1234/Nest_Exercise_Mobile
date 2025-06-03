@@ -41,40 +41,42 @@ export class CategoryService {
     });
   }
 
-  async findOne(name: string, userId: string) {
+  async findOne(id: string, userId: string) {
     const category = await this.prisma.category.findFirst({
-      where: { name, userId },
+      where: { id, userId },
       select: {
+        id: true,
         name: true,
       },
     });
     if (!category) {
-      throw new NotFoundException(`Category with name ${name} not found`);
+      throw new NotFoundException(`Category with id ${id} not found`);
     }
     return category;
   }
 
   async update(
-    name: string,
+    id: string,
     updateCategoryDto: UpdateCategoryDto,
     userId: string,
   ) {
-    await this.findOne(name, userId); // Ensure category exists and belongs to user
+    await this.findOne(id, userId); // Ensure category exists and belongs to user
     return this.prisma.category.update({
-      where: { name },
+      where: { id },
       data: {
         name: updateCategoryDto.name,
       },
       select: {
+        id: true,
         name: true,
       },
     });
   }
 
-  async remove(name: string, userId: string) {
-    await this.findOne(name, userId); // Ensure wallet exists and belongs to user
+  async remove(id: string, userId: string) {
+    await this.findOne(id, userId); // Ensure wallet exists and belongs to user
     return this.prisma.category.delete({
-      where: { name },
+      where: { id },
     });
   }
 }
