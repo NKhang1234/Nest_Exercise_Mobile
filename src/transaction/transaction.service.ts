@@ -8,14 +8,42 @@ export class TransactionService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createTransactionDto: CreateTransactionDto, userId: string) {
+    // find wallet ID
+    const wallet = await this.prisma.wallet.findFirst({
+      where: { name: createTransactionDto.walletId, userId },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!wallet) {
+      throw new NotFoundException(
+        `Wallet with name ${createTransactionDto.walletId} not found`,
+      );
+    }
+
+    // find category ID
+    const category = await this.prisma.category.findFirst({
+      where: { name: createTransactionDto.categoryId, userId },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!category) {
+      throw new NotFoundException(
+        `Category with name ${createTransactionDto.categoryId} not found`,
+      );
+    }
+
     return this.prisma.transaction.create({
       data: {
         type: createTransactionDto.type,
         amount: createTransactionDto.amount,
         currency: createTransactionDto.currency,
         date: createTransactionDto.date,
-        walletId: createTransactionDto.walletId,
-        categoryId: createTransactionDto.categoryId,
+        walletId: wallet.id,
+        categoryId: category.id,
         repeat: createTransactionDto.repeat || 'None',
         note: createTransactionDto.note,
         picture: createTransactionDto.picture,
@@ -51,6 +79,34 @@ export class TransactionService {
   ) {
     await this.findOne(id, userId); // Ensure transaction exists and belongs to user
 
+    // find wallet ID
+    const wallet = await this.prisma.wallet.findFirst({
+      where: { name: updateTransactionDto.walletId, userId },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!wallet) {
+      throw new NotFoundException(
+        `Wallet with name ${updateTransactionDto.walletId} not found`,
+      );
+    }
+
+    // find category ID
+    const category = await this.prisma.category.findFirst({
+      where: { name: updateTransactionDto.categoryId, userId },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!category) {
+      throw new NotFoundException(
+        `Category with name ${updateTransactionDto.categoryId} not found`,
+      );
+    }
+
     return this.prisma.transaction.update({
       where: { id },
       data: {
@@ -58,8 +114,8 @@ export class TransactionService {
         amount: updateTransactionDto.amount,
         currency: updateTransactionDto.currency,
         date: updateTransactionDto.date,
-        walletId: updateTransactionDto.walletId,
-        categoryId: updateTransactionDto.categoryId,
+        walletId: wallet.id,
+        categoryId: category.id,
         repeat: updateTransactionDto.repeat,
         note: updateTransactionDto.note,
         picture: updateTransactionDto.picture,
