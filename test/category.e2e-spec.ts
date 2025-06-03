@@ -107,7 +107,7 @@ describe('CategoryController (e2e)', () => {
         .expect(201);
 
       const response = await request(app.getHttpServer())
-        .get(`/categories/${getResponse.body.id}`)
+        .get(`/categories/${getResponse.body.name}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
@@ -140,7 +140,7 @@ describe('CategoryController (e2e)', () => {
         .expect(201);
 
       const response = await request(app.getHttpServer())
-        .put('/categories/' + getResponse.body.id)
+        .put('/categories/' + getResponse.body.name)
         .set('Authorization', `Bearer ${authToken}`)
         .send({ name: 'TestCategoryUpdated' })
         .expect(200);
@@ -163,13 +163,13 @@ describe('CategoryController (e2e)', () => {
 
       // Delete category
       await request(app.getHttpServer())
-        .delete('/categories/' + getResponse.body.id)
+        .delete('/categories/' + getResponse.body.name)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(HttpStatus.NO_CONTENT);
 
       // Verify deletion
       await request(app.getHttpServer())
-        .get('/categories/' + getResponse.body.id)
+        .get('/categories/' + getResponse.body.name)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(HttpStatus.NOT_FOUND);
     } catch (error) {

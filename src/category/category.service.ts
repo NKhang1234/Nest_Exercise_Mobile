@@ -41,42 +41,59 @@ export class CategoryService {
     });
   }
 
-  async findOne(id: string, userId: string) {
+  async findOne(name: string, userId: string) {
     const category = await this.prisma.category.findFirst({
-      where: { id, userId },
+      where: { name, userId },
       select: {
-        id: true,
         name: true,
       },
     });
     if (!category) {
-      throw new NotFoundException(`Category with id ${id} not found`);
+      throw new NotFoundException(`Category with name ${name} not found`);
     }
     return category;
   }
 
   async update(
-    id: string,
+    name: string,
     updateCategoryDto: UpdateCategoryDto,
     userId: string,
   ) {
-    await this.findOne(id, userId); // Ensure category exists and belongs to user
+    await this.findOne(name, userId); // Ensure category exists and belongs to user
+    // get the category id
+    const category = await this.prisma.category.findFirst({
+      where: { name, userId },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!category) {
+      throw new NotFoundException(`Category with name ${name} not found`);
+    }
+
     return this.prisma.category.update({
-      where: { id },
+      where: { id: category.id },
       data: {
         name: updateCategoryDto.name,
       },
       select: {
-        id: true,
         name: true,
       },
     });
   }
 
-  async remove(id: string, userId: string) {
-    await this.findOne(id, userId); // Ensure wallet exists and belongs to user
+  async remove(name: string, userId: string) {
+    await this.findOne(name, userId); // Ensure wallet exists and belongs to user
+    // get the category id
+    const category = await this.prisma.category.findFirst({
+      where: { name, userId },
+      select: {
+        id: true,
+      },
+    });
     return this.prisma.category.delete({
-      where: { id },
+      where: { id: category!.id },
     });
   }
 }
