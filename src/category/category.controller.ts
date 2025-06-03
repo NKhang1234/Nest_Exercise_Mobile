@@ -49,34 +49,34 @@ export class CategoryController {
     return this.categoryService.findAll(userId);
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a category by id' })
+  @Get(':name')
+  @ApiOperation({ summary: 'Get a category by name' })
   @ApiResponse({ status: 404, description: 'Category not found' })
-  async findOne(@Param('id') id: string, @Req() req: RequestWithUser) {
+  async findOne(@Param('name') name: string, @Req() req: RequestWithUser) {
     const userId = req.user.id;
-    return this.categoryService.findOne(id, userId);
+    return this.categoryService.findOne(name, userId);
   }
 
-  @Put(':id')
-  @ApiOperation({ summary: 'Update a category by id' })
+  @Put(':name')
+  @ApiOperation({ summary: 'Update a category by name' })
   @ApiResponse({ status: 200, description: 'Category updated successfully' })
   async update(
-    @Param('id') id: string,
+    @Param('name') name: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
     @Req() req: RequestWithUser,
   ) {
     const userId = req.user.id;
-    return this.categoryService.update(id, updateCategoryDto, userId);
+    return this.categoryService.update(name, updateCategoryDto, userId);
   }
 
-  @Delete(':id')
+  @Delete(':name')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete a category by id' })
+  @ApiOperation({ summary: 'Delete a category by name' })
   @ApiResponse({ status: 204, description: 'Category deleted successfully' })
   @ApiResponse({ status: 404, description: 'Category not found' })
-  async remove(@Param('id') id: string, @Req() req: RequestWithUser) {
+  async remove(@Param('name') name: string, @Req() req: RequestWithUser) {
     const userId = req.user.id;
-    await this.categoryService.remove(id, userId);
+    await this.categoryService.remove(name, userId);
     // Không return gì cả để trả về 204 No Content
   }
 }
